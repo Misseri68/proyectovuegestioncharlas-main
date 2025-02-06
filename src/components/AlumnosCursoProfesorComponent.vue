@@ -1,6 +1,7 @@
 <template>
   <div class="container my-3 my-md-5 p-4">
-    <!-- Botón de retroceder -->
+     <div></div>
+         <!-- Botón de retroceder -->
     <button class="btn-retroceder" @click="volverAtras">
       <i class="fas fa-arrow-left"></i>
       <!-- Ícono de retroceder -->
@@ -9,6 +10,14 @@
     <h2 class="mb-4 text-center" style="font-size: 42px; font-weight: 400px">
       Gestión de Alumnos
     </h2>
+    <!-- Botones filtros -->
+    <div v-if="mostrarFiltros" class="mt-2 d-flex justify-content-lg-center">
+      <button class="btn-filtroactivo"  @click="filtrarAlumnosActivos">Activos</button>
+      <button class="btn btn-danger"  @click="filtrarAlumnosInactivos">Inactivos</button>
+      <button class="btn btn-info"  @click="filtrarAlumnosCharlasPropuestas">Propuestas</button>
+      <button class="btn btn-info"  @click="filtrarAlumnosCharlasAceptadas">Aceptadas</button>
+      <button class="btn btn-info"  @click="filtrarAlumnosSinCharlas">Sin charlas</button>
+    </div>
     <hr class="linea-separadora" />
     <!-- Mostrar spinner mientras se cargan los alumnos -->
 
@@ -28,7 +37,7 @@
 
     <!-- Tarjetas de Usuarios -->
     <div class="row row-cols-xl-3 row-cols-lg-2 row-cols-1 d-flex">
-      <div class="col" v-for="alumno in alumnos" :key="alumno.alumno.idUsuario">
+      <div class="col"  v-for="alumno in alumnosFiltrados" :key="alumno.alumno.idUsuario">
         <div class="card-usuario">
           <div class="card-encabezado" style="background-color: #7782c6">
             <i
@@ -86,12 +95,68 @@ export default {
   data() {
     return {
       alumnos: [],
+      alumnosFiltrados: [],
       cargando: false,
       perfilService: new PerfilService(),
       curso: { activo: false },
+      mostrarFiltros: false,
+      botonCodigo: 0,
     };
   },
   methods: {
+
+    filtrarAlumnosActivos(){
+      if(this.botonCodigo == 1){
+        this.alumnosFiltrados = this.alumnos;  //Vuelve al estado inicial; quita el filtro
+        this.botonCodigo = 0;
+      }else{
+        this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.alumno.estadoUsuario == true)
+        this.botonCodigo = 1;
+
+      }
+    },
+
+    filtrarAlumnosInactivos(){
+      if(this.botonCodigo == 2){
+        this.alumnosFiltrados = this.alumnos; 
+        this.botonCodigo = 0;
+      }else{
+        this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.alumno.estadoUsuario == false)
+        this.botonCodigo = 2;
+      }
+    },
+
+    filtrarAlumnosCharlasPropuestas(){
+      if(this.botonCodigo == 3){
+        this.alumnosFiltrados = this.alumnos; 
+      }else{
+        this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.charlasPropuestas > 0)
+        this.botonCodigo = 3;
+      }
+    },
+
+    filtrarAlumnosCharlasAceptadas(){
+      if(this.botonCodigo == 4){
+        this.alumnosFiltrados = this.alumnos; 
+        this.botonCodigo = 0;
+      }else{
+        this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.charlasAceptadas > 0)
+        this.botonCodigo = 4;
+    }
+    },
+
+    filtrarAlumnosSinCharlas(){
+      if(this.botonCodigo == 5){
+        this.alumnosFiltrados = this.alumnos;  
+        this.botonCodigo = 0;
+      }else{
+        this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.charlasTotales == 0)
+        this.botonCodigo = 5;
+      }
+    },
+
+  
+
     abrirAlerta(alumno) {
       if (alumno.estadoUsuario) {
         // Si el alumno está activo, se le pregunta si quiere desactivarlo
@@ -173,7 +238,6 @@ export default {
       <strong>Curso:</strong> ${alumno.alumno.curso}<br>
       <strong>Email:</strong> ${alumno.alumno.email}<br>
       <strong>Charlas totales:</strong>
-       ${alumno.charlasTotales}<br> <!-- Aquí accedes a charlasTotales -->
       <strong>Estado:</strong> ${
         alumno.alumno.estadoUsuario ? "Activo" : "Inactivo"
       } </div>
@@ -186,33 +250,24 @@ export default {
       try {
         const idCurso = this.$route.query.idCurso;
         const activo = this.$route.query.activo === 'true';
-        console.log("idCurso:", idCurso);
+        this.mostrarFiltros = activo;
         this.cargando = true;
         console.log("Cargando alumnos...");
 
-        // const data = await this.perfilService.getAlumnosCursoProfesorEnAlumnos(
-        //   idCurso
-        // );
-        // console.log("Los alumnos son: ", data);
-
         let data;
-        console.log("EL maldito ud: " + activo);
+
         if (activo) {
-          // Si el curso está activo, se obtiene la lista de alumnos activos
-          data = await this.perfilService.getAlumnosCursoProfesorEnAlumnos(
-            idCurso
-          );
+          // Si el curso está activo, se obtiene la lista de alumnos del curso activo
+          data = await this.perfilService.getAlumnosCursoProfesorEnAlumnos(idCurso);
           console.log("Los alumnos activos son: ", data);
         } else {
           // Si el curso está inactivo, se obtiene el historial de alumnos
-          data = await this.perfilService.getAlumnosCursoHistorialProfesor(
-            idCurso
-          );
+          data = await this.perfilService.getAlumnosCursoHistorialProfesor(idCurso);
           console.log("Los alumnos del historial son: ", data);
         }
-
-        // Verifica que hay alumn
+          //Filtrar alumnos que están activos
         this.alumnos = data.alumnos; // Asignamos los alumnos del primer curso encontrado
+        this.alumnosFiltrados = this.alumnos;
         console.log("Alumnos cargados correctamente: ", this.alumnos);
       } catch (error) {
         console.error("Error al cargar los alumnos:", error);
@@ -230,6 +285,7 @@ export default {
   created() {
     this.cargarAlumnos();
   },
+  
 };
 </script>
 
@@ -242,6 +298,10 @@ export default {
   font-size: 14px;
 }
 
+.btn-filtroactivo
+{
+  background-color:#40685c;
+}
 .btn-group button {
   background-color: #cbcbcb;
   border: none;
