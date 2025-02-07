@@ -1,22 +1,48 @@
 <template>
   <div class="container my-3 my-md-5 p-4">
-     <div></div>
-         <!-- Botón de retroceder -->
-    <button class="btn-retroceder" @click="volverAtras">
-      <i class="fas fa-arrow-left"></i>
-      <!-- Ícono de retroceder -->
-    </button>
 
-    <h2 class="mb-4 text-center" style="font-size: 42px; font-weight: 400px">
-      Gestión de Alumnos
-    </h2>
+    <div class="d-flex mb-2">
+      <div class="divboton">
+        <button class="btn-retroceder" style="width: auto; background-color: #4651C5" @click="volverAtras">
+          <i class="fas fa-arrow-left" style="color: white;"></i>
+        </button>
+      </div>
+
+
+      <h2 class="mb-4 text-center titulocentrado" style="font-size: 42px; font-weight: 400px; width: 100%; ">
+        Gestión de Alumnos
+      </h2>
+    </div>
+    <!-- Botón de retroceder -->
+
     <!-- Botones filtros -->
-    <div v-if="mostrarFiltros" class="mt-2 d-flex justify-content-lg-center">
-      <button class="btn-filtroactivo"  @click="filtrarAlumnosActivos">Activos</button>
-      <button class="btn btn-danger"  @click="filtrarAlumnosInactivos">Inactivos</button>
-      <button class="btn btn-info"  @click="filtrarAlumnosCharlasPropuestas">Propuestas</button>
-      <button class="btn btn-info"  @click="filtrarAlumnosCharlasAceptadas">Aceptadas</button>
-      <button class="btn btn-info"  @click="filtrarAlumnosSinCharlas">Sin charlas</button>
+    <div v-if="mostrarFiltros" class="d-flex justify-content-lg-center botonesFiltros card text-center"
+      style=" border-radius : 30px;">
+      <div class="card-header">
+        <h4 class="card-title mt-3">Filtrar alumnos</h4>
+      </div>
+      <div class="card-body">
+        <button :class="{ 'btn-filtroactivo': botonCodigo === 1 }" @click="filtrarAlumnosActivos">
+          <i v-if="botonCodigo === 1" class="fa-solid fa-check me-1"></i>
+          <span class="me-1">Activos</span>
+        </button>
+        <button :class="{ 'btn-filtroactivo': botonCodigo === 2 }" @click="filtrarAlumnosInactivos">
+          <i v-if="botonCodigo === 2" class="fa-solid fa-check me-1"></i>
+          <span class="me-1">Inactivos</span>
+        </button>
+        <button :class="{ 'btn-filtroactivo': botonCodigo === 3 }" @click="filtrarAlumnosCharlasPropuestas">
+          <i v-if="botonCodigo === 3" class="fa-solid fa-check me-1"></i>
+          <span class="me-1">Propuestas</span>
+        </button>
+        <button :class="{ 'btn-filtroactivo': botonCodigo === 4 }" @click="filtrarAlumnosCharlasAceptadas">
+          <i v-if="botonCodigo === 4" class="fa-solid fa-check me-1"></i>
+          <span class="me-1">Aceptadas</span>
+        </button>
+        <button :class="{ 'btn-filtroactivo': botonCodigo === 5 }" @click="filtrarAlumnosSinCharlas">
+          <i v-if="botonCodigo === 5" class="fa-solid fa-check me-1"></i>
+          <span class="me-1">Sin charlas</span>
+        </button>
+      </div>
     </div>
     <hr class="linea-separadora" />
     <!-- Mostrar spinner mientras se cargan los alumnos -->
@@ -28,22 +54,16 @@
     </div>
 
     <!-- Mostrar mensaje si no hay alumnos -->
-    <div
-      v-if="!alumnos.length && !cargando"
-      class="alert alert-warning text-center my-4"
-    >
+    <div v-if="!alumnos.length && !cargando" class="alert alert-warning text-center my-4">
       No hay alumnos en el curso.
     </div>
 
     <!-- Tarjetas de Usuarios -->
     <div class="row row-cols-xl-3 row-cols-lg-2 row-cols-1 d-flex">
-      <div class="col"  v-for="alumno in alumnosFiltrados" :key="alumno.alumno.idUsuario">
+      <div class="col" v-for="alumno in alumnosFiltrados" :key="alumno.alumno.idUsuario">
         <div class="card-usuario">
           <div class="card-encabezado" style="background-color: #7782c6">
-            <i
-              class="fas fa-info-circle info-icon"
-              @click="mostrarInformacionUsuario(alumno)"
-            ></i>
+            <i class="fas fa-info-circle info-icon" @click="mostrarInformacionUsuario(alumno)"></i>
           </div>
           <div class="card-cuerpo">
             <div class="profile-info">
@@ -53,31 +73,28 @@
                   {{ alumno.alumno.usuario }}
                 </div>
                 <div class="user-curso subtitulo" style="font-size: 13px">
-                  {{ alumno.alumno.email }} 
+                  {{ alumno.alumno.email }}
                   <span class="badge bg-info text-dark">
-                    {{alumno.charlasTotales}}
-                    </span>           
+                    {{ alumno.charlasTotales }}
+                  </span>
                   <span class="badge bg-danger">
-                    {{alumno.charlasPropuestas}}
-                    </span>  
+                    {{ alumno.charlasPropuestas }}
+                  </span>
                   <span class="badge bg-success">
-                    {{alumno.charlasAceptadas}}
-                    </span>                 
+                    {{ alumno.charlasAceptadas }}
+                  </span>
                 </div>
               </div>
             </div>
             <div class="btn-group">
               <!-- Solo mostrar el botón si el curso está activo -->
-              <button
-                @click="abrirAlerta(alumno.alumno)"
-                v-text="alumno.alumno.estadoUsuario ? 'Desactivar' : 'Activar'"
-                :style="{
+              <button @click="abrirAlerta(alumno.alumno)"
+                v-text="alumno.alumno.estadoUsuario ? 'Desactivar' : 'Activar'" :style="{
                   backgroundColor: alumno.alumno.estadoUsuario
                     ? '#ff4d4f'
                     : '#4CAF50',
                   color: 'white',
-                }"
-              ></button>
+                }"></button>
             </div>
           </div>
         </div>
@@ -105,57 +122,55 @@ export default {
   },
   methods: {
 
-    filtrarAlumnosActivos(){
-      if(this.botonCodigo == 1){
+    filtrarAlumnosActivos() {
+      if (this.botonCodigo == 1) {
         this.alumnosFiltrados = this.alumnos;  //Vuelve al estado inicial; quita el filtro
         this.botonCodigo = 0;
-      }else{
+      } else {
         this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.alumno.estadoUsuario == true)
         this.botonCodigo = 1;
-
       }
     },
 
-    filtrarAlumnosInactivos(){
-      if(this.botonCodigo == 2){
-        this.alumnosFiltrados = this.alumnos; 
+    filtrarAlumnosInactivos() {
+      if (this.botonCodigo == 2) {
+        this.alumnosFiltrados = this.alumnos;
         this.botonCodigo = 0;
-      }else{
+      } else {
         this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.alumno.estadoUsuario == false)
         this.botonCodigo = 2;
       }
     },
 
-    filtrarAlumnosCharlasPropuestas(){
-      if(this.botonCodigo == 3){
-        this.alumnosFiltrados = this.alumnos; 
-      }else{
-        this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.charlasPropuestas > 0)
+    filtrarAlumnosCharlasPropuestas() {
+      if (this.botonCodigo == 3) {
+        this.alumnosFiltrados = this.alumnos;
+        this.botonCodigo = 0;
+      } else {
+        this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.alumno.estadoUsuario == true && alumno.charlasPropuestas > 0)
         this.botonCodigo = 3;
       }
     },
 
-    filtrarAlumnosCharlasAceptadas(){
-      if(this.botonCodigo == 4){
-        this.alumnosFiltrados = this.alumnos; 
+    filtrarAlumnosCharlasAceptadas() {
+      if (this.botonCodigo == 4) {
+        this.alumnosFiltrados = this.alumnos;
         this.botonCodigo = 0;
-      }else{
-        this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.charlasAceptadas > 0)
+      } else {
+        this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.alumno.estadoUsuario == true && alumno.charlasAceptadas > 0)
         this.botonCodigo = 4;
-    }
-    },
-
-    filtrarAlumnosSinCharlas(){
-      if(this.botonCodigo == 5){
-        this.alumnosFiltrados = this.alumnos;  
-        this.botonCodigo = 0;
-      }else{
-        this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.charlasTotales == 0)
-        this.botonCodigo = 5;
       }
     },
 
-  
+    filtrarAlumnosSinCharlas() {
+      if (this.botonCodigo == 5) {
+        this.alumnosFiltrados = this.alumnos;
+        this.botonCodigo = 0;
+      } else {
+        this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.alumno.estadoUsuario == true && alumno.charlasTotales == 0)
+        this.botonCodigo = 5;
+      }
+    },
 
     abrirAlerta(alumno) {
       if (alumno.estadoUsuario) {
@@ -192,9 +207,8 @@ export default {
     async cambiarEstadoAlumno(alumno, activar) {
       Swal.fire({
         title: activar ? "Activando..." : "Desactivando...",
-        text: `Por favor, espere mientras se ${
-          activar ? "activa" : "desactiva"
-        } al usuario.`,
+        text: `Por favor, espere mientras se ${activar ? "activa" : "desactiva"
+          } al usuario.`,
         allowOutsideClick: false,
         didOpen: () => {
           Swal.showLoading();
@@ -211,8 +225,7 @@ export default {
         // Muestra un mensaje de éxito
         Swal.fire(
           "¡Éxito!",
-          `El usuario "${alumno.usuario}" ha sido ${
-            activar ? "activado" : "desactivado"
+          `El usuario "${alumno.usuario}" ha sido ${activar ? "activado" : "desactivado"
           }.`,
           "success"
         );
@@ -220,9 +233,8 @@ export default {
         // Muestra un mensaje de error
         Swal.fire({
           title: "¡Error!",
-          text: `No se pudo ${
-            activar ? "activar" : "desactivar"
-          } el usuario. Por favor, inténtelo de nuevo.`,
+          text: `No se pudo ${activar ? "activar" : "desactivar"
+            } el usuario. Por favor, inténtelo de nuevo.`,
           icon: "error",
           confirmButtonText: "Cerrar",
         });
@@ -238,9 +250,8 @@ export default {
       <strong>Curso:</strong> ${alumno.alumno.curso}<br>
       <strong>Email:</strong> ${alumno.alumno.email}<br>
       <strong>Charlas totales:</strong>
-      <strong>Estado:</strong> ${
-        alumno.alumno.estadoUsuario ? "Activo" : "Inactivo"
-      } </div>
+      <strong>Estado:</strong> ${alumno.alumno.estadoUsuario ? "Activo" : "Inactivo"
+          } </div>
     `,
         icon: "info",
         confirmButtonText: "OK",
@@ -265,9 +276,10 @@ export default {
           data = await this.perfilService.getAlumnosCursoHistorialProfesor(idCurso);
           console.log("Los alumnos del historial son: ", data);
         }
-          //Filtrar alumnos que están activos
+        //Filtrar alumnos que están activos
         this.alumnos = data.alumnos; // Asignamos los alumnos del primer curso encontrado
-        this.alumnosFiltrados = this.alumnos;
+        this.alumnosFiltrados = this.alumnos.filter(alumno => alumno.alumno.estadoUsuario == true)
+        this.botonCodigo = 1;
         console.log("Alumnos cargados correctamente: ", this.alumnos);
       } catch (error) {
         console.error("Error al cargar los alumnos:", error);
@@ -284,12 +296,69 @@ export default {
 
   created() {
     this.cargarAlumnos();
+   
   },
-  
+  watch: {
+    '$route'() {
+      this.alumnos = '';
+      this.alumnosFiltrados = '';
+      this.cargarAlumnos(); // Llamas a tu función de actualización manualmente
+    }
+  }
+
 };
 </script>
 
 <style scoped>
+
+.titulocentrado{
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.divboton{
+  position: absolute;
+  margin-top:6px;
+  z-index: 20;
+}
+
+
+.botonesFiltros {
+  gap: 10px;
+}
+
+.botonesFiltros button {
+  background-color: #e8ece9;
+  color: #494949;
+  border: none;
+  border-bottom: solid 2px #494949;
+  padding: 8px 15px;
+  margin: 5px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 200px;
+  font-weight: 600;
+}
+
+.botonesFiltros button:hover {
+  background-color: #bdc2bf;
+}
+
+.botonesFiltros h4 {
+  color: #494949;
+
+}
+
+.btn-filtroactivo {
+  background-color: #87D0B1 !important;
+  color: #13172b !important;
+
+}
+
+
 .card-usuario:last-child {
   margin-right: 0;
 }
@@ -298,10 +367,7 @@ export default {
   font-size: 14px;
 }
 
-.btn-filtroactivo
-{
-  background-color:#40685c;
-}
+
 .btn-group button {
   background-color: #cbcbcb;
   border: none;
@@ -409,7 +475,7 @@ export default {
 
 .btn-activar {
   margin-left: 0px !important;
-  background-color: #40685c !important; 
+  background-color: #40685c !important;
   color: white;
   cursor: pointer;
 }
@@ -433,7 +499,8 @@ export default {
   }
 
   .card-usuario {
-    width: 400px; /* Ajusta el ancho máximo de las tarjetas */
+    width: 400px;
+    /* Ajusta el ancho máximo de las tarjetas */
     margin-left: auto;
     margin-right: auto;
   }
@@ -441,7 +508,8 @@ export default {
 
 @media (max-width: 450px) {
   .card-usuario {
-    width: 350px; /* Ajusta el ancho máximo de las tarjetas */
+    width: 350px;
+    /* Ajusta el ancho máximo de las tarjetas */
     margin-left: auto;
     margin-right: auto;
   }
@@ -449,16 +517,21 @@ export default {
 
 @media (max-width: 400px) {
   .card-usuario {
-    width: 300px; /* Ajusta el ancho máximo de las tarjetas */
+    width: 300px;
+    /* Ajusta el ancho máximo de las tarjetas */
     margin-left: auto;
     margin-right: auto;
   }
 }
 
 .swal2-cancel.btn-red {
-  background-color: #ff4d4f !important; /* Rojo intenso */
-  color: white !important; /* Texto blanco */
-  border: none !important; /* Sin borde */
-  box-shadow: none !important; /* Sin sombra */
+  background-color: #ff4d4f !important;
+  /* Rojo intenso */
+  color: white !important;
+  /* Texto blanco */
+  border: none !important;
+  /* Sin borde */
+  box-shadow: none !important;
+  /* Sin sombra */
 }
 </style>

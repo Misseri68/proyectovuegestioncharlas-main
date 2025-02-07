@@ -52,7 +52,7 @@ h1{
 p{
   font-family: "Nunito Sans", serif;
 }
-h2, h3, h4, h5{
+h2, h3, h4, h5, span{
   font-family: "Hind Guntur", serif;}
 body{
   background-color: #FDFAFA!important;
